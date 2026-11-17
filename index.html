@@ -55,6 +55,9 @@
   <label for="cantidad" id="lblCant">Cantidad</label>
   <input id="cantidad" inputmode="decimal" autocomplete="off" placeholder="0">
 
+  <label for="token">Token</label>
+  <input id="token" type="password" autocomplete="off" autocapitalize="off" placeholder="Token de acceso">
+
   <label for="usuario">Usuario</label>
   <input id="usuario" autocomplete="name" placeholder="Tu nombre">
 
@@ -69,7 +72,6 @@
   // ===== Configuración =====
   const CONFIG = {
     endpoint: 'https://script.google.com/macros/s/AKfycbx_SBuDhQRbWBKQ9b1uq3TF0pFzUk94Qvig1rwRCl9kCpFu9kA0reSxREbuK0AA_j2L/exec',
-    token: 'MI-TOKEN',
     hoja: 'Escaneos'
   };
   const ZXING_URL = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';
@@ -210,10 +212,13 @@
     if (!codigo) { setStatus('Escanea o escribe el código', 'bad'); return; }
     if (!cantidad) { setStatus(tipo === 'Medidor' ? 'Escribe la lectura' : 'Escribe la cantidad', 'bad'); return; }
 
+    const token = $('token').value.trim();
+    if (!token) { setStatus('Escribe el token', 'bad'); return; }
+
     const usuario = $('usuario').value.trim();
     const formatoTxt = $('formato').textContent.replace('Formato: ', '') || 'Manual';
     const payload = {
-      token: CONFIG.token,
+      token: token,
       hoja: CONFIG.hoja,
       tipo: tipo,
       codigo: codigo,
@@ -234,7 +239,7 @@
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       });
-      try { localStorage.setItem('usuario', usuario); } catch (e) {}
+      try { localStorage.setItem('usuario', usuario); localStorage.setItem('token', token); } catch (e) {}
       limpiar();
       setStatus('Enviado a la hoja ✔', 'good');
     } catch (e) {
@@ -251,6 +256,8 @@
   try {
     const u = localStorage.getItem('usuario');
     if (u) $('usuario').value = u;
+    const t = localStorage.getItem('token');
+    if (t) $('token').value = t;
   } catch (e) {}
 </script>
 </body>
